@@ -76,7 +76,7 @@ jobs:
           java-version: 14
 
       - name: Build project with Maven
-          run: mvn -B package --file pom.xml
+        run: mvn -B package --file pom.xml
   build:
     name: Build
     runs-on: ubuntu-latest
