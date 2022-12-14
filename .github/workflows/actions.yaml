@@ -47,7 +47,7 @@ jobs:
         run: mvn -B compile
   security:
     runs-on: ubuntu-latest
-    if: contains(fromJson('["pull_request"]'), github.event_name )|| (github.ref == 'refs/heads/master')
+#    if: contains(fromJson('["pull_request"]'), github.event_name )|| (github.ref == 'refs/heads/master')
     steps:
       - uses: actions/checkout@master
       - name: Run Snyk to check for vulnerabilities (Monitor only)
