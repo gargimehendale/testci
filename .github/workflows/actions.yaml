@@ -83,7 +83,7 @@ jobs:
 
         server-username: GITHUB_USER_REF  # env variable name for username
 
-        server-password: GITHUB_TOKEN_RE
+        server-password: GITHUB_TOKEN_REF
     - name: Check working directory
       run: echo "${GITHUB_WORKSPACE}"
     - name: Extract Maven project version
