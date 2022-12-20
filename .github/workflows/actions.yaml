@@ -65,6 +65,7 @@ jobs:
         with:
           args: --sarif-file-output=snyk.sarif
   build_and_test:
+    if: contains(fromJson('["pull_request"]'), github.event_name )|| (github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     needs: compile
     steps:
@@ -79,22 +80,47 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 14
+        server-id: github
+
+        server-username: GITHUB_USER_REF  # env variable name for username
+
+        server-password: GITHUB_TOKEN_REF
     - name: Check working directory
       run: echo "${GITHUB_WORKSPACE}"
+    - name: Extract Maven project version
+      run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+      id: project
+
+    - name: Generate build number
+      id: buildnumber
+      uses: einaregilsson/build-number@v3 
+      with:
+        token: ${{secrets.github_token}}   
+
     - name: Build project with Maven
       run: | 
-           mvn -B package --file pom.xml
-           mkdir staging && cp target/*.jar staging/ 
+           mvn -B package --file pom.xml 
+           mvn -B versions:set -DnewVersion=${{ steps.project.outputs.version }}.${{ steps.buildnumber.outputs.build_number }} -DgenerateBackupPoms=false
+           mvn deploy  
+      env:
+
+          GITHUB_USER_REF: ${{ secrets.GIT_USERNAME }}
+
+          GITHUB_TOKEN_REF: ${{ secrets.GIT_TOKEN }}
     - name: Test
       run: mvn --batch-mode -Dmaven.test.failure.ignore=true test
     - name: Test Report
-      uses: dorny/test-reporter@v1
+      uses: phoenix-actions/test-reporting@v8
+      id: test-report 
       if: success() || failure()    # run this step even if previous step failed
       with:
         name: JEST Tests            # Name of the check run which will be created
         path: target/surefire-reports/TEST-*.xml    # Path to test results
         reporter: java-junit       # Format of test results
         fail-on-error: 'false'
+    - name: Read output variables
+      run: |
+         echo "url is ${{ steps.test-report.outputs.runHtmlUrl }}"
     - name: Build and analyze
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any

@@ -17,7 +17,18 @@
           <sonar.organization>gargimehendale-testci</sonar.organization>
           <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
-
+    <distributionManagement>
+            <repository>
+              <id>github</id>
+              <name>inception</name>
+              <url>https://maven.pkg.github.com/gargimehendale/testci</url>
+            </repository>
+    </distributionManagement>
+    <profiles>
+        <profile>
+            <id>github</id>
+        </profile>
+    </profiles>
     <dependencies>
          <dependency>
              <groupId>joda-time</groupId>
