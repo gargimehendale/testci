@@ -14,7 +14,7 @@ on:
       - 'feature/**'  
 permissions:
   contents: read
-  package: write
+  packages: write
   id-token: write
   security-events: write
 jobs:
