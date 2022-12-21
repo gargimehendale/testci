@@ -65,7 +65,7 @@ jobs:
         with:
           args: --sarif-file-output=snyk.sarif
   build_and_test:
-    #if: contains(fromJson('["pull_request"]'), github.event_name )|| (github.ref == 'refs/heads/master')
+    if: contains(fromJson('["pull_request"]'), github.event_name )|| (github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     needs: compile
     steps:
@@ -127,7 +127,7 @@ jobs:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=gargimehendale_testci
   Upload_Artifact:
-    #if: contains(fromJson('["pull_request"]'), github.event_name )|| (github.ref == 'refs/heads/master')
+    if: contains(fromJson('["pull_request"]'), github.event_name )|| (github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     needs: build_and_test
     steps:
@@ -152,13 +152,9 @@ jobs:
         name: Package
         path: staging
   deploy:
-    #permissions: write-all
-      #contents: read # for actions/checkout to fetch code
-      #security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-      #actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
     runs-on: ubuntu-latest
     needs: Upload_Artifact
-    #if: contains(fromJson('["pull_request"]'), github.event_name )|| (github.ref == 'refs/heads/master')
+    if: contains(fromJson('["pull_request"]'), github.event_name )|| (github.ref == 'refs/heads/master')
     steps:
     - uses: actions/checkout@v2
     - uses: actions/download-artifact@v1
@@ -185,7 +181,6 @@ jobs:
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: 'docker.io/gargimehendale/testci:${{ steps.buildnumber.outputs.build_number }}'
-#        format: 'sarif'
         format: 'template'
 #        exit-code: '1'
         ignore-unfixed: true
